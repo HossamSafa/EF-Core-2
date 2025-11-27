@@ -1,5 +1,6 @@
 ﻿using EF_Core_2.DatabaseContext;
 using EF_Core_2.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EF_Core_2
 {
@@ -154,26 +155,117 @@ namespace EF_Core_2
 
             #endregion
 
-            var aircraftRoute = dbContext.AircraftRoutes.FirstOrDefault(ar => ar.AircraftId == aircraft01.Id && ar.RouteId == route.Id);
+            //var aircraftRoute = dbContext.AircraftRoutes.FirstOrDefault(ar => ar.AircraftId == aircraft01.Id && ar.RouteId == route.Id);
 
-            if (aircraftRoute is null)
-            {
-                var assignRoute = new AircraftRoute
-                {
-                    AircraftId = aircraft01.Id,
-                    RouteId = route.Id,
-                    Duration = 4,
-                    Price = 3000m
-                };
+            //if (aircraftRoute is null)
+            //{
+            //    var assignRoute = new AircraftRoute
+            //    {
+            //        AircraftId = aircraft01.Id,
+            //        RouteId = route.Id,
+            //        Duration = 4,
+            //        Price = 3000m
+            //    };
 
-                dbContext.AircraftRoutes.Add(assignRoute);
-                dbContext.SaveChanges();
-                Console.WriteLine("\nAssigned Model01 to Cairo -> Dubai with duration 4h and price 3000 LE");
-            }
-            else
-            {
-                Console.WriteLine("\nAssignment already exists between Model01 and Cairo->Dubai");
-            }
+            //    dbContext.AircraftRoutes.Add(assignRoute);
+            //    dbContext.SaveChanges();
+            //    Console.WriteLine("\nAssigned Model01 to Cairo -> Dubai with duration 4h and price 3000 LE");
+            //}
+            //else
+            //{
+            //    Console.WriteLine("\nAssignment already exists between Model01 and Cairo->Dubai");
+            //}
+            Console.WriteLine();
+            Console.WriteLine("########################################################");
+            Console.WriteLine();
+
+            #region Load "EgyptAir" With all its aircrafts and their routes
+            //var result = dbContext.Airlines.Where(A=>A.Name == "EgyptAir")
+            //    .Include(A=>A.Aircrafts)
+            //    .ThenInclude(AR=>AR.AircraftRoutes)
+            //    .ThenInclude(R=>R.Route)
+            //    .FirstOrDefault();
+
+            ////Console.WriteLine("EgyptAir with its aircrafts and routes:");
+
+            //if(result is not null)
+            //{
+            //    foreach(var aircraft in result.Aircrafts)
+            //    {
+            //        Console.WriteLine($"Aircraft: {aircraft.Model} ({aircraft.Capacity})");
+            //        foreach(var aircraftRoute in aircraft.AircraftRoutes)
+            //            Console.WriteLine($"Route: {aircraftRoute.Route.Origin} To {aircraftRoute.Route.Destination}");
+            //    }
+            //} 
+            #endregion
+
+            #region Retrieve all airlines with their employees, and for each employee load their qualifications.
+            //var result = dbContext.Airlines.Include(a=>a.Employees).ToList();
+
+            //Console.WriteLine("\nAirlines with employees and qualifications:");
+
+            //foreach (var airline  in result)
+            //{
+            //    Console.WriteLine($"Airline: {airline.Name}");
+            //    foreach (var emp in airline.Employees)
+            //    {
+            //        Console.WriteLine($"Employee: {emp.Name}, Qualifications: {emp.Qualification1}, {emp.Qualification2}, {emp.Qualification3}");
+            //    }
+            //} 
+            #endregion
+
+            #region Load all airlines with their transactions, but only include transactions where Amount > 10000
+            //var result = dbContext.Airlines.Include(a => a.Transactions.Where(t => t.Amount > 10000)).ToList();
+
+            //Console.WriteLine("\nAirlines with transactions > 10000:");
+
+            //foreach (var airline in result)
+            //{
+            //    Console.WriteLine($"Airline: {airline.Name}");
+            //    foreach (var trx in airline.Transactions)
+            //    {
+            //        Console.WriteLine($"Transaction: {trx.Description}, Amount: {trx.Amount}");
+            //    }
+            //} 
+            #endregion
+
+            #region List all employees with their airline name
+            //var employeesWithAirlinesName = dbContext.Employees
+            //                                         .Join(dbContext.Airlines,
+            //                                               e=>e.AirlineId,
+            //                                               a=>a.Id,
+            //                                               (e,a) => new
+            //                                               {
+            //                                                   EmployeeName = e.Name,
+            //                                                   AirlineName = a.Name
+            //                                               }
+            //                                         ).ToList();
+
+            //Console.WriteLine("\nEmployees with their airline name:");
+
+            //foreach ( var item in employeesWithAirlinesName )
+            //    Console.WriteLine($"Empolyee: {item.EmployeeName}, Airline: {item.AirlineName}");
+
+            #endregion
+
+            #region Show all transactions (id, amount, description) along with the airline name, but only where Amount > 20000.
+            var result = dbContext.Transactions.Where(t => t.Amount > 20000)
+                                                   .Join(dbContext.Airlines,
+                                                         t => t.AirlineId,
+                                                         a => a.Id,
+                                                         (t, a) => new
+                                                         {
+                                                             t.Id,
+                                                             t.Amount,
+                                                             t.Description,
+                                                             AirlineName = a.Name
+                                                         });
+
+            Console.WriteLine("\nTransactions > 20000 with airline name:");
+
+            foreach (var t in result)
+                Console.WriteLine($"ID: {t.Id}, Amount: {t.Amount}, Description: {t.Description}, Airline: {t.AirlineName}"); 
+            #endregion
         }
     }
 }
